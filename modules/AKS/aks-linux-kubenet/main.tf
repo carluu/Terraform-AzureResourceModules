@@ -8,9 +8,9 @@ resource "azurerm_kubernetes_cluster" "aks" {
 
   # Pool config
   default_node_pool {
-    name    = "default"
-    node_count    = var.poolnodes
-    vm_size = var.vm_size
+    name       = "default"
+    node_count = var.poolnodes
+    vm_size    = var.vm_size
   }
 
   # Service principal settings

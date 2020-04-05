@@ -1,5 +1,5 @@
 data "azurerm_resource_group" "rg-main" {
-name = var.mainrg
+  name = var.mainrg
 }
 
 resource "azurerm_network_interface" "linuxvmnic" {

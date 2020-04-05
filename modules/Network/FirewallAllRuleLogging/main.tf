@@ -1,5 +1,5 @@
 data "azurerm_resource_group" "rg-main" {
-name = var.mainrg
+  name = var.mainrg
 }
 
 resource "azurerm_subnet" "firewallsubnet" {
@@ -58,8 +58,8 @@ resource "azurerm_firewall_network_rule_collection" "catchallrule" {
 }
 
 resource "azurerm_monitor_diagnostic_setting" "firewalldiag" {
-  name               = "firewalldiag"
-  target_resource_id = azurerm_firewall.azurefirewall.id
+  name                       = "firewalldiag"
+  target_resource_id         = azurerm_firewall.azurefirewall.id
   log_analytics_workspace_id = var.defaultworkspaceid
 
   log {
@@ -68,7 +68,7 @@ resource "azurerm_monitor_diagnostic_setting" "firewalldiag" {
 
     retention_policy {
       enabled = true
-      days = 0
+      days    = 0
     }
   }
 
@@ -78,7 +78,7 @@ resource "azurerm_monitor_diagnostic_setting" "firewalldiag" {
 
     retention_policy {
       enabled = true
-      days = 0
+      days    = 0
     }
   }
 
@@ -87,7 +87,7 @@ resource "azurerm_monitor_diagnostic_setting" "firewalldiag" {
 
     retention_policy {
       enabled = true
-      days = 0
+      days    = 0
     }
   }
 }
@@ -99,9 +99,9 @@ resource "azurerm_route_table" "routetofirewall" {
   disable_bgp_route_propagation = false
 
   route {
-    name           = "routetofirewall"
-    address_prefix = "0.0.0.0/0"
-    next_hop_type  = "VirtualAppliance"
+    name                   = "routetofirewall"
+    address_prefix         = "0.0.0.0/0"
+    next_hop_type          = "VirtualAppliance"
     next_hop_in_ip_address = azurerm_firewall.azurefirewall.ip_configuration[0].private_ip_address
   }
 }

@@ -7,5 +7,5 @@ resource "azurerm_data_factory" "adf" {
 resource "azurerm_data_factory_pipeline" "adf-pipeline" {
   name                = "adf-pipeline-${var.name_suffix}"
   resource_group_name = var.mainrg
-  data_factory_name = azurerm_data_factory.adf.name
+  data_factory_name   = azurerm_data_factory.adf.name
 }
