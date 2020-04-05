@@ -34,3 +34,18 @@ variable "sql_server_pass" {
   type = string
 }
 
+variable "core_network_name" {
+  type = string
+}
+
+variable "core_network_vnet_cidr" {
+  type = string
+}
+
+variable "core_network_default_subnet_cidr" {
+  type = string
+}
+
+variable "core_network_firewall_subnet_cidr" {
+  type = string
+}

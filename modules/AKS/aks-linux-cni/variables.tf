@@ -46,3 +46,7 @@ variable "region" {
 variable "mainrg" {
   type = string
 }
+
+variable "core_network_name" {
+  type = string
+}

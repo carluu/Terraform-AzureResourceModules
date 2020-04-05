@@ -6,10 +6,14 @@ variable "region" {
   type = string
 }
 
-variable "region" {
+variable "mainrg" {
   type = string
 }
 
-variable "mainrg" {
+variable "core_network_name" {
+  type = string
+}
+
+variable "core_network_firewall_subnet_cidr" {
   type = string
 }

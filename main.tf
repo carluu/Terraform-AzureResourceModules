@@ -17,6 +17,13 @@ resource "azurerm_resource_group" "rg-main" {
   location = var.region
 }
 
+resource "azurerm_virtual_network" "vnet-main" {
+  name                = var.core_network_name
+  address_space       = ["${var.core_network_vnet_cidr}"]
+  location            = var.region
+  resource_group_name = azurerm_resource_group.rg-main.name
+}
+
 
 module "aks-linux-kubenet" {
   source           = "./modules/AKS/aks-linux-kubenet"
@@ -43,6 +50,7 @@ module "aks-linux-cni" {
   k8s_cni_docker_bridge_range = var.aks_k8s_cni_docker_bridge_range
   k8s_cni_dns_ip              = var.aks_k8s_cni_dns_ip
   mainrg = azurerm_resource_group.rg-main.name
+  core_network_name = azurerm_virtual_network.vnet-main.name
 }
 
 
@@ -101,3 +109,11 @@ module "storage-adlsg2" {
   kind = "StorageV2"
 }
 
+module "firewall" {
+  source      = "./modules/Network/Firewall"
+  name_suffix = var.name_suffix
+  region = var.region
+  mainrg = azurerm_resource_group.rg-main.name
+  core_network_name = azurerm_virtual_network.vnet-main.name
+  core_network_firewall_subnet_cidr = var.core_network_firewall_subnet_cidr
+}

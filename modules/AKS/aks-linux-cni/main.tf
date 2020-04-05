@@ -7,17 +7,9 @@ locals {
   cluster_address_space = "${var.k8s_cni_startIp}/${local.subnetMask}"
 }
 
-# Create the cluster vnet
-resource "azurerm_virtual_network" "cluster-vnet" {
-  name                = "vnet-aks-linux-cni-cluster-${var.name_suffix}"
-  resource_group_name = var.mainrg
-  location            = var.region
-  address_space       = ["${local.cluster_address_space}"]
-}
-
 # Create the subnet
 resource "azurerm_subnet" "cluster-subnet" {
-  virtual_network_name = azurerm_virtual_network.cluster-vnet.name
+  virtual_network_name = var.core_network_name
   name                 = "subnet-aks-linux-cni-cluster-${var.name_suffix}"
   resource_group_name  = var.mainrg
   address_prefix       = local.cluster_address_space
