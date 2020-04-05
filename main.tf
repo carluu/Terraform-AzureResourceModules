@@ -129,27 +129,28 @@ module "storage-adlsg2" {
 }
 */
 module "firewallallrulelogging" {
-  source      = "./modules/Network/FirewallAllRuleLogging"
-  name_suffix = var.name_suffix
-  mainrg = azurerm_resource_group.rg-main.name
-  defaultworkspaceid = azurerm_log_analytics_workspace.defaultworkspace.id
-  core_network_name = azurerm_virtual_network.vnet-main.name
+  source                            = "./modules/Network/FirewallAllRuleLogging"
+  name_suffix                       = var.name_suffix
+  mainrg                            = azurerm_resource_group.rg-main.name
+  defaultworkspaceid                = azurerm_log_analytics_workspace.defaultworkspace.id
+  core_network_name                 = azurerm_virtual_network.vnet-main.name
   core_network_firewall_subnet_cidr = var.core_network_firewall_subnet_cidr
-  default_subnet_id = azurerm_subnet.subnet-default.id
+  default_subnet_id                 = azurerm_subnet.subnet-default.id
 }
 
+
 module "linuxbasicvm" {
-  source      = "./modules/VM/LinuxBasicVM"
-  mainrg = azurerm_resource_group.rg-main.name
-  subnet_id = azurerm_subnet.subnet-default.id
-  vm_name = "linuxvm1-${var.name_suffix}"
-  nic_name = "linuxnic1-${var.name_suffix}"
-  sku = "Standard_D2s_v3"
-  os_disk_caching = "ReadWrite"
-  os_disk_type = "Standard_LRS"
+  source             = "./modules/VM/LinuxBasicVM"
+  mainrg             = azurerm_resource_group.rg-main.name
+  subnet_id          = azurerm_subnet.subnet-default.id
+  vm_name            = "linuxvm1-${var.name_suffix}"
+  nic_name           = "linuxnic1-${var.name_suffix}"
+  sku                = "Standard_D2s_v3"
+  os_disk_caching    = "ReadWrite"
+  os_disk_type       = "Standard_LRS"
   os_image_publisher = "Canonical"
-  os_image_offer = "UbuntuServer"
-  os_image_sku = "16.04-LTS"
-  os_image_version = "latest"
-  
+  os_image_offer     = "UbuntuServer"
+  os_image_sku       = "16.04-LTS"
+  os_image_version   = "latest"
+
 }
