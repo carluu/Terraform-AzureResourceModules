@@ -12,6 +12,7 @@ provider "azurerm" {
   features {}
 }
 
+/************** CORE RESOURCES **************/
 resource "azurerm_resource_group" "rg-main" {
   name     = "rg-terraform-${var.name_suffix}"
   location = var.region
@@ -20,11 +21,29 @@ resource "azurerm_resource_group" "rg-main" {
 resource "azurerm_virtual_network" "vnet-main" {
   name                = var.core_network_name
   address_space       = ["${var.core_network_vnet_cidr}"]
-  location            = var.region
+  location            = azurerm_resource_group.rg-main.location
   resource_group_name = azurerm_resource_group.rg-main.name
 }
 
+resource "azurerm_subnet" "subnet-default" {
+  name                 = "default"
+  resource_group_name  = azurerm_resource_group.rg-main.name
+  virtual_network_name = var.core_network_name
+  address_prefix       = var.core_network_default_subnet_cidr
+}
 
+resource "azurerm_log_analytics_workspace" "defaultworkspace" {
+  name                = "terraform-workspace-${var.name_suffix}"
+  location            = azurerm_resource_group.rg-main.location
+  resource_group_name = azurerm_resource_group.rg-main.name
+  sku                 = "PerGB2018"
+  retention_in_days   = 30
+}
+
+
+/************** END CORE RESOURCES **************/
+
+/*
 module "aks-linux-kubenet" {
   source           = "./modules/AKS/aks-linux-kubenet"
   name_suffix      = "test"
@@ -108,12 +127,29 @@ module "storage-adlsg2" {
   tier = "Standard"
   kind = "StorageV2"
 }
-
-module "firewall" {
-  source      = "./modules/Network/Firewall"
+*/
+module "firewallallrulelogging" {
+  source      = "./modules/Network/FirewallAllRuleLogging"
   name_suffix = var.name_suffix
-  region = var.region
   mainrg = azurerm_resource_group.rg-main.name
+  defaultworkspaceid = azurerm_log_analytics_workspace.defaultworkspace.id
   core_network_name = azurerm_virtual_network.vnet-main.name
   core_network_firewall_subnet_cidr = var.core_network_firewall_subnet_cidr
+  default_subnet_id = azurerm_subnet.subnet-default.id
+}
+
+module "linuxbasicvm" {
+  source      = "./modules/VM/LinuxBasicVM"
+  mainrg = azurerm_resource_group.rg-main.name
+  subnet_id = azurerm_subnet.subnet-default.id
+  vm_name = "linuxvm1-${var.name_suffix}"
+  nic_name = "linuxnic1-${var.name_suffix}"
+  sku = "Standard_D2s_v3"
+  os_disk_caching = "ReadWrite"
+  os_disk_type = "Standard_LRS"
+  os_image_publisher = "Canonical"
+  os_image_offer = "UbuntuServer"
+  os_image_sku = "16.04-LTS"
+  os_image_version = "latest"
+  
 }
