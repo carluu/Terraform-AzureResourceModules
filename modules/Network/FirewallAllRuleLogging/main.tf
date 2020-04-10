@@ -91,22 +91,3 @@ resource "azurerm_monitor_diagnostic_setting" "firewalldiag" {
     }
   }
 }
-
-resource "azurerm_route_table" "routetofirewall" {
-  name                          = "routetofirewall"
-  location                      = data.azurerm_resource_group.rg-main.location
-  resource_group_name           = data.azurerm_resource_group.rg-main.name
-  disable_bgp_route_propagation = false
-
-  route {
-    name                   = "routetofirewall"
-    address_prefix         = "0.0.0.0/0"
-    next_hop_type          = "VirtualAppliance"
-    next_hop_in_ip_address = azurerm_firewall.azurefirewall.ip_configuration[0].private_ip_address
-  }
-}
-
-resource "azurerm_subnet_route_table_association" "default_routetofirewall" {
-  subnet_id      = var.default_subnet_id
-  route_table_id = azurerm_route_table.routetofirewall.id
-}
