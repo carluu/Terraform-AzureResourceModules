@@ -17,7 +17,7 @@ resource "azurerm_resource_group" "rg-main" {
   name     = "rg-terraform-${var.name_suffix}"
   location = var.region
 }
-
+/*
 resource "azurerm_virtual_network" "vnet-main" {
   name                = var.core_network_name
   address_space       = ["${var.core_network_vnet_cidr}"]
@@ -28,8 +28,54 @@ resource "azurerm_virtual_network" "vnet-main" {
 resource "azurerm_subnet" "subnet-default" {
   name                 = "default"
   resource_group_name  = azurerm_resource_group.rg-main.name
-  virtual_network_name = var.core_network_name
+  virtual_network_name = azurerm_virtual_network.vnet-main.name
   address_prefix       = var.core_network_default_subnet_cidr
+}
+
+resource "azurerm_route_table" "routetofirewall" {
+  name                          = "routetofirewall"
+  location                      = azurerm_resource_group.rg-main.location
+  resource_group_name           = azurerm_resource_group.rg-main.name
+  disable_bgp_route_propagation = false
+
+  route {
+    name                   = "routetofirewall"
+    address_prefix         = "0.0.0.0/0"
+    next_hop_type          = "VirtualAppliance"
+    next_hop_in_ip_address = module.firewallallrulelogging.firewall_private_ip
+  }
+}
+
+resource "azurerm_subnet_route_table_association" "default_routetofirewall" {
+  subnet_id      = azurerm_subnet.subnet-service-endpoints.id
+  route_table_id = azurerm_route_table.routetofirewall.id
+}
+
+resource "azurerm_subnet" "subnet-service-endpoints" {
+  name                 = "default-with-endpoints"
+  resource_group_name  = azurerm_resource_group.rg-main.name
+  virtual_network_name = azurerm_virtual_network.vnet-main.name
+  address_prefix       = var.core_network_serviceendpoints_subnet_cidr
+  service_endpoints    = ["Microsoft.AzureActiveDirectory", "Microsoft.AzureCosmosDB", "Microsoft.ContainerRegistry", "Microsoft.EventHub", "Microsoft.KeyVault", "Microsoft.ServiceBus", "Microsoft.Sql", "Microsoft.Storage", "Microsoft.Web"]
+}
+
+resource "azurerm_route_table" "routetofirewallse" {
+  name                          = "routetofirewallse"
+  location                      = azurerm_resource_group.rg-main.location
+  resource_group_name           = azurerm_resource_group.rg-main.name
+  disable_bgp_route_propagation = false
+
+  route {
+    name                   = "routetofirewallse"
+    address_prefix         = "0.0.0.0/0"
+    next_hop_type          = "VirtualAppliance"
+    next_hop_in_ip_address = module.firewallallrulelogging.firewall_private_ip
+  }
+}
+
+resource "azurerm_subnet_route_table_association" "se_routetofirewall" {
+  subnet_id      = azurerm_subnet.subnet-service-endpoints.id
+  route_table_id = azurerm_route_table.routetofirewall.id
 }
 
 resource "azurerm_log_analytics_workspace" "defaultworkspace" {
@@ -39,7 +85,7 @@ resource "azurerm_log_analytics_workspace" "defaultworkspace" {
   sku                 = "PerGB2018"
   retention_in_days   = 30
 }
-
+*/
 
 /************** END CORE RESOURCES **************/
 
@@ -127,7 +173,8 @@ module "storage-adlsg2" {
   tier = "Standard"
   kind = "StorageV2"
 }
-*/
+
+/*
 module "firewallallrulelogging" {
   source                            = "./modules/Network/FirewallAllRuleLogging"
   name_suffix                       = var.name_suffix
@@ -142,7 +189,7 @@ module "firewallallrulelogging" {
 module "linuxbasicvm" {
   source             = "./modules/VM/LinuxBasicVM"
   mainrg             = azurerm_resource_group.rg-main.name
-  subnet_id          = azurerm_subnet.subnet-default.id
+  subnet_id          = azurerm_subnet.subnet-service-endpoints.id
   vm_name            = "linuxvm1-${var.name_suffix}"
   nic_name           = "linuxnic1-${var.name_suffix}"
   sku                = "Standard_D2s_v3"
@@ -154,3 +201,37 @@ module "linuxbasicvm" {
   os_image_version   = "latest"
 
 }
+
+
+module "linuxbasicvm2" {
+  source             = "./modules/VM/LinuxBasicVM"
+  mainrg             = azurerm_resource_group.rg-main.name
+  subnet_id          = azurerm_subnet.subnet-service-endpoints.id
+  vm_name            = "linuxvm2-${var.name_suffix}"
+  nic_name           = "linuxnic2-${var.name_suffix}"
+  sku                = "Standard_D2s_v3"
+  os_disk_caching    = "ReadWrite"
+  os_disk_type       = "Standard_LRS"
+  os_image_publisher = "Canonical"
+  os_image_offer     = "UbuntuServer"
+  os_image_sku       = "16.04-LTS"
+  os_image_version   = "latest"
+
+}
+
+module "linuxbasicvm3" {
+  source             = "./modules/VM/LinuxBasicVM"
+  mainrg             = azurerm_resource_group.rg-main.name
+  subnet_id          = azurerm_subnet.subnet-service-endpoints.id
+  vm_name            = "linuxvm3-${var.name_suffix}"
+  nic_name           = "linuxnic3-${var.name_suffix}"
+  sku                = "Standard_D2s_v3"
+  os_disk_caching    = "ReadWrite"
+  os_disk_type       = "Standard_LRS"
+  os_image_publisher = "Canonical"
+  os_image_offer     = "UbuntuServer"
+  os_image_sku       = "16.04-LTS"
+  os_image_version   = "latest"
+
+}
+*/
